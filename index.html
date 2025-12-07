@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه گزارش‌دهی بحران و محیط‌زیست</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>
+                <i class="fas fa-map-marked-alt"></i>
+                سامانه گزارش‌دهی داینامیک بحران و محیط‌زیست
+            </h1>
+            <p>نقشه تعاملی - مختصات جغرافیایی زنده - سطح فوریت داینامیک - تأیید ثبت گزارش</p>
+        </header>
+
+        <div class="main-content">
+            <div class="form-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-edit"></i> فرم ثبت گزارش جدید</h2>
+                        <span class="badge">گام ۱: تکمیل فرم</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="reportForm">
+                            <div class="form-group">
+                                <label class="form-label" for="reportType">
+                                    <i class="fas fa-tag"></i>
+                                    نوع گزارش
+                                </label>
+                                <select id="reportType" class="form-control" required>
+                                    <option value="">-- انتخاب نوع گزارش --</option>
+                                    <option value="environment">گزارش محیط‌زیستی</option>
+                                    <option value="crisis">گزارش بحران</option>
+                                    <option value="damage">گزارش خسارت</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="reportTitle">
+                                    <i class="fas fa-heading"></i>
+                                    عنوان گزارش
+                                </label>
+                                <input type="text" id="reportTitle" class="form-control"
+                                    placeholder="عنوان مختصر و واضح برای گزارش" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="reportDescription">
+                                    <i class="fas fa-align-left"></i>
+                                    شرح کامل
+                                </label>
+                                <textarea id="reportDescription" class="form-control"
+                                    placeholder="شرح دقیق حادثه، زمان وقوع، شدت و هر اطلاعات مهم دیگر..."
+                                    required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    موقعیت جغرافیایی
+                                </label>
+                                <div class="coordinates-container">
+                                    <div class="coordinate-box" id="latBox">
+                                        <span class="coordinate-label">عرض جغرافیایی (Latitude)</span>
+                                        <span class="coordinate-value" id="latitudeDisplay">--.--</span>
+                                    </div>
+                                    <div class="coordinate-box" id="lngBox">
+                                        <span class="coordinate-label">طول جغرافیایی (Longitude)</span>
+                                        <span class="coordinate-value" id="longitudeDisplay">--.--</span>
+                                    </div>
+                                </div>
+                                <p style="font-size: 0.9rem; color: #6c757d; margin-top: 10px; text-align: center;">
+                                    <i class="fas fa-info-circle"></i>
+                                    برای انتخاب موقعیت، روی نقشه کلیک کنید
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    سطح فوریت
+                                </label>
+                                <div class="urgency-container">
+                                    <div class="urgency-levels">
+                                        <button type="button" class="urgency-btn low" data-level="low">
+                                            <i class="fas fa-thermometer-empty"></i>
+                                            کم
+                                        </button>
+                                        <button type="button" class="urgency-btn medium active" data-level="medium">
+                                            <i class="fas fa-thermometer-half"></i>
+                                            متوسط
+                                        </button>
+                                        <button type="button" class="urgency-btn high" data-level="high">
+                                            <i class="fas fa-thermometer-full"></i>
+                                            زیاد
+                                        </button>
+                                        <button type="button" class="urgency-btn critical" data-level="critical">
+                                            <i class="fas fa-skull-crossbones"></i>
+                                            بحرانی
+                                        </button>
+                                    </div>
+                                    <input type="hidden" id="urgencyLevel" value="medium">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="submit-btn" id="submitBtn">
+                                <i class="fas fa-paper-plane"></i>
+                                ثبت گزارش
+                            </button>
+                        </form>
+
+                        <div class="success-message" id="successMessage">
+                            <div class="success-content">
+                                <i class="fas fa-check-circle success-icon"></i>
+                                <div>
+                                    <h3 style="margin-bottom: 5px;">گزارش با موفقیت ثبت شد!</h3>
+                                    <p style="opacity: 0.9; font-size: 0.95rem;" id="successDetails"></p>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px; font-size: 0.9rem;">
+                                <i class="fas fa-clock"></i>
+                                <span id="reportTime"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-map"></i> نقشه تعاملی</h2>
+                        <div class="map-controls">
+                            <button type="button" class="map-btn" id="locateBtn">
+                                <i class="fas fa-location-arrow"></i>
+                                موقعیت من
+                            </button>
+                            <button type="button" class="map-btn" id="resetBtn">
+                                <i class="fas fa-redo"></i>
+                                بازنشانی
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="map"></div>
+                        <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <p style="margin: 0; font-size: 0.95rem; color: #6c757d;">
+                                <i class="fas fa-lightbulb"></i>
+                                <strong>راهنما:</strong> روی نقشه کلیک کنید تا موقعیت حادثه مشخص شود. مختصات به صورت
+                                زنده در فیلدهای بالا نمایش داده می‌شود.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-reports">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-history"></i> گزارش‌های اخیر</h2>
+                    <span class="badge" id="reportCount">۰ گزارش</span>
+                </div>
+                <div class="card-body">
+                    <div class="reports-grid" id="reportsContainer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-hands-helping"></i>
+                    <span>همکاری برای جامعه‌ای ایمن‌تر</span>
+                </div>
+                <div class="footer-info">
+                    <p>این سامانه با هدف تسهیل مشارکت شهروندان در مدیریت بحران و حفاظت از محیط‌زیست ایجاد شده است.
+                        گزارش‌های شما پس از تأیید در اختیار سازمان‌های ذی‌ربط قرار می‌گیرد.</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem;">
+                        <i class="fas fa-phone"></i> پشتیبانی: ۱۲۳۴۵
+                        <span style="margin: 0 15px;">|</span>
+                        <i class="fas fa-envelope"></i> ایمیل: info@vgi-crisis.ir
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+
+</html>
